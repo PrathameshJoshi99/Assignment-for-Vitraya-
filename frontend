@@ -1,0 +1,49 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const App = () => {
+    const [image, setImage] = useState(null);
+    const [text, setText] = useState('');
+    const [boldWords, setBoldWords] = useState([]);
+
+    const handleFileChange = (e) => {
+        setImage(e.target.files[0]);
+    };
+
+    const handleSubmit = async () => {
+        const formData = new FormData();
+        formData.append('image', image);
+
+        try {
+            const response = await axios.post('http://localhost:5000/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            setText(response.data.text);
+            setBoldWords(response.data.bold_words);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    return (
+        <div>
+            <input type="file" onChange={handleFileChange} />
+            <button onClick={handleSubmit}>Upload Image</button>
+            <img src={image ? URL.createObjectURL(image) : ''} alt="Uploaded" />
+            <div>
+                <h3>Extracted Text:</h3>
+                <p>{text}</p>
+                <h3>Bold Words:</h3>
+                <ul>
+                    {boldWords.map((word, index) => (
+                        <li key={index}>{word}</li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
+};
+
+export default App;
